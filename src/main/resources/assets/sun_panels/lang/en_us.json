@@ -1,0 +1,14 @@
+{
+  "block.sun_panels.basic_solar_panel": "Basic Solar Panel",
+  "block.sun_panels.advanced_solar_panel": "Advanced Solar Panel",
+  "block.sun_panels.elite_solar_panel": "Elite Solar Panel",
+
+  "block.sun_panels.basic_energy_pipe": "Basic Energy Pipe",
+  "block.sun_panels.advanced_energy_pipe": "Advanced Energy Pipe",
+  "block.sun_panels.elite_energy_pipe": "Elite Energy Pipe",
+
+  "itemGroup.sun_panels.sun_panels_tab": "Sun Panels",
+
+  "gui.sun_panels.energy": "Energy: %d / %d RF",
+  "gui.sun_panels.generation": "Generating: %d RF/t (Max: %d RF/t)"
+} 

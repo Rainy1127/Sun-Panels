@@ -1,27 +1,88 @@
+# Simplest Solar Panels
 
-Installation information
-=======
+A simple Minecraft mod that adds three tiers of solar panels for generating Redstone Flux (RF) energy.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions at [github](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+## Features
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+This mod adds three tiers of solar panels to Minecraft:
 
-> **Note**: For Eclipse, use tasks in `Launch Group` instead of ones founds in `Java Application`. A preparation task must run before launching the game. NeoGradle uses launch groups to do these subsequently.
+### Basic Solar Panel
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+- ⚡ Power Output: 32 RF/t
+- 🔋 Internal Storage: 4,000 RF
+- Affordable to craft, good for early game
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+### Advanced Solar Panel
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+- ⚡ Power Output: 128 RF/t
+- 🔋 Internal Storage: 16,000 RF
+- Requires mid-game resources, suitable for automation
+
+### Elite Solar Panel
+
+- ⚡ Power Output: 512 RF/t
+- 🔋 Internal Storage: 64,000 RF
+- Expensive to craft, but efficient for late-game setups
+
+## How It Works
+
+- Solar panels generate energy during daylight hours
+- Generation is affected by time of day (reduced at dawn/dusk)
+- Panels must have a clear line of sight to the sky
+- Energy is automatically transferred to adjacent energy-accepting blocks
+- Power generation stops at night or during storms
+
+## Recipes
+
+### Basic Solar Panel
+- 3x Glass
+- 2x Redstone
+- 1x Daylight Detector
+- 3x Iron Ingots
+
+### Advanced Solar Panel
+- 3x Glass Panes
+- 2x Redstone Blocks
+- 1x Basic Solar Panel
+- 3x Diamonds
+
+### Elite Solar Panel
+- 3x Glass
+- 2x Redstone Blocks
+- 1x Advanced Solar Panel
+- 3x Netherite Ingots
+
+## Multi-Mod Compatibility
+
+This mod is designed to work with all major energy-using mods:
+
+### RF/FE Based Mods (Native Compatibility)
+Directly compatible with all Forge Energy (FE) based mods through the NeoForge energy system:
+
+- ✅ **Thermal Series** (formerly Thermal Expansion)
+- ✅ **RFTools Power**
+- ✅ **Powah**
+- ✅ **Ender IO**
+- ✅ **Applied Energistics 2**
+- ✅ **Immersive Engineering**
+
+### Joules Based Mods
+- ✅ **Mekanism**: Full integration with Mekanism's energy system
+    - Energy is converted at the standard rate of 1 RF = 2.5 Joules
+    - Solar panels automatically register with Mekanism via IMC
+
+### EU Based Mods
+- ✅ **Tech Reborn**: Compatible with Tech Reborn's EU system
+    - Energy is converted at the standard rate of 4 RF = 1 EU
+    - Fully supports Tech Reborn machines and cables
+
+All compatibility is completely optional - the mod works fine without any of these mods installed, and will automatically detect and integrate with any that are present.
+
+## Requirements
+
+- Minecraft 1.21.1
+- NeoForge 20.4.0-beta or higher
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

@@ -1,0 +1,31 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "sun_panels:block/pipe/elite_center" }
+    },
+    {
+      "when": { "north": "true" },
+      "apply": { "model": "sun_panels:block/pipe/elite_arm", "uvlock": true }
+    },
+    {
+      "when": { "east": "true" },
+      "apply": { "model": "sun_panels:block/pipe/elite_arm", "y": 90, "uvlock": true }
+    },
+    {
+      "when": { "south": "true" },
+      "apply": { "model": "sun_panels:block/pipe/elite_arm", "y": 180, "uvlock": true }
+    },
+    {
+      "when": { "west": "true" },
+      "apply": { "model": "sun_panels:block/pipe/elite_arm", "y": 270, "uvlock": true }
+    },
+    {
+      "when": { "up": "true" },
+      "apply": { "model": "sun_panels:block/pipe/elite_arm", "x": 270, "uvlock": true }
+    },
+    {
+      "when": { "down": "true" },
+      "apply": { "model": "sun_panels:block/pipe/elite_arm", "x": 90, "uvlock": true }
+    }
+  ]
+} 
