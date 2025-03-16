@@ -1,4 +1,4 @@
-# Simplest Solar Panels
+# Sun Panels
 
 A simple Minecraft mod that adds three tiers of solar panels for generating Redstone Flux (RF) energy.
 
@@ -26,7 +26,7 @@ This mod adds three tiers of solar panels to Minecraft:
 
 ## How It Works
 
-- Solar panels generate energy during daylight hours
+- Sun panels generate energy during daylight hours
 - Generation is affected by time of day (reduced at dawn/dusk)
 - Panels must have a clear line of sight to the sky
 - Energy is automatically transferred to adjacent energy-accepting blocks
@@ -86,3 +86,9 @@ All compatibility is completely optional - the mod works fine without any of the
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+❓ Issues & Feedback
+
+If you encounter any bugs or have suggestions, please leave a comment on this page! Your feedback helps improve the mod.
+
+Enjoy Sun Panels and power up your world with clean, renewable energy! 🌞⚡
