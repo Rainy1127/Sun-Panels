@@ -2,13 +2,17 @@
   "block.sun_panels.basic_solar_panel": "Basic Solar Panel",
   "block.sun_panels.advanced_solar_panel": "Advanced Solar Panel",
   "block.sun_panels.elite_solar_panel": "Elite Solar Panel",
-
   "block.sun_panels.basic_energy_pipe": "Basic Energy Pipe",
   "block.sun_panels.advanced_energy_pipe": "Advanced Energy Pipe",
   "block.sun_panels.elite_energy_pipe": "Elite Energy Pipe",
-
   "itemGroup.sun_panels.sun_panels_tab": "Sun Panels",
-
-  "gui.sun_panels.energy": "Energy: %d / %d RF",
-  "gui.sun_panels.generation": "Generating: %d RF/t (Max: %d RF/t)"
-} 
+  "gui.sun_panels.stored": "STORED",
+  "gui.sun_panels.output": "OUTPUT",
+  "gui.sun_panels.rf": "%s RF",
+  "gui.sun_panels.rf_t": "%s / %s RF/t",
+  "gui.sun_panels.energy_tooltip": "Energy: %s / %s RF",
+  "gui.sun_panels.sky.sun": "SUNLIGHT",
+  "gui.sun_panels.sky.dark": "NO DAYLIGHT",
+  "gui.sun_panels.sky.blocked": "NO SKY ACCESS",
+  "gui.sun_panels.hint.blocked": "Glass on top is fine"
+}

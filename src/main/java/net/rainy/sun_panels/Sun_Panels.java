@@ -2,6 +2,7 @@ package net.rainy.sun_panels;
 
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.rainy.sun_panels.block.entity.BaseSolarPanelBlockEntity;
+import net.rainy.sun_panels.block.entity.pipe.BaseEnergyPipeBlockEntity;
 import net.rainy.sun_panels.compat.ModCompatManager;
 import net.rainy.sun_panels.registry.*;
 import org.slf4j.Logger;
@@ -84,6 +85,7 @@ public class Sun_Panels
 
     private void registerCapabilities(final RegisterCapabilitiesEvent event) {
         BaseSolarPanelBlockEntity.registerCapabilities(event);
+        BaseEnergyPipeBlockEntity.registerCapabilities(event);
     }
 
     // Add the example block item to the building blocks tab

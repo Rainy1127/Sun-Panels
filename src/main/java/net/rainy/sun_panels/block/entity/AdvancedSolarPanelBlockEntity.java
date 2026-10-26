@@ -1,23 +1,14 @@
 package net.rainy.sun_panels.block.entity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.rainy.sun_panels.menu.SolarPanelMenu;
 import net.rainy.sun_panels.registry.ModBlockEntities;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class AdvancedSolarPanelBlockEntity extends BaseSolarPanelBlockEntity implements MenuProvider {
+public class AdvancedSolarPanelBlockEntity extends BaseSolarPanelBlockEntity {
     // Advanced Solar Panel: 128 RF/t, 16,000 RF storage
     private static final int CAPACITY = 16000;
     private static final int GENERATION_RATE = 128;
-    private static final int MAX_GENERATION = GENERATION_RATE; // Maximum generation rate
 
     public AdvancedSolarPanelBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ADVANCED_SOLAR_PANEL.get(), pos, state, CAPACITY, GENERATION_RATE);
@@ -28,18 +19,6 @@ public class AdvancedSolarPanelBlockEntity extends BaseSolarPanelBlockEntity imp
     }
 
     public int getMaxGeneration() {
-        return MAX_GENERATION;
-    }
-
-    @Override
-    public @NotNull Component getDisplayName() {
-        return Component.translatable("block.rainy.advanced_solar_panel");
-    }
-
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-        return new SolarPanelMenu(containerId, inventory, this,
-                net.minecraft.world.inventory.ContainerLevelAccess.create(level, worldPosition));
+        return GENERATION_RATE;
     }
 }

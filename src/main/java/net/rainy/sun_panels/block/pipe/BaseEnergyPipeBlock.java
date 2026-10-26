@@ -9,8 +9,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -20,6 +18,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.rainy.sun_panels.block.entity.pipe.BaseEnergyPipeBlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -146,10 +145,23 @@ public abstract class BaseEnergyPipeBlock extends Block implements EntityBlock {
         };
     }
 
-    @Nullable
     @Override
-    public abstract <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, @NotNull BlockState state,
-                                                                           @NotNull BlockEntityType<T> blockEntityType);
+    protected void neighborChanged(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos,
+                                   @NotNull Block neighborBlock, @NotNull BlockPos neighborPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        if (level.isClientSide()) {
+            return;
+        }
+        if (!(level.getBlockEntity(pos) instanceof BaseEnergyPipeBlockEntity pipe)) {
+            return;
+        }
+        for (Direction side : Direction.values()) {
+            if (pos.relative(side).equals(neighborPos)) {
+                pipe.onNeighborChanged(side, level.getBlockState(neighborPos));
+                return;
+            }
+        }
+    }
 
     @Nullable
     @Override

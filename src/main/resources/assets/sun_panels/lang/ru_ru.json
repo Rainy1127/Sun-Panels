@@ -1,0 +1,18 @@
+{
+  "block.sun_panels.basic_solar_panel": "Базовая солнечная панель",
+  "block.sun_panels.advanced_solar_panel": "Продвинутая солнечная панель",
+  "block.sun_panels.elite_solar_panel": "Элитная солнечная панель",
+  "block.sun_panels.basic_energy_pipe": "Базовая энергетическая труба",
+  "block.sun_panels.advanced_energy_pipe": "Продвинутая энергетическая труба",
+  "block.sun_panels.elite_energy_pipe": "Элитная энергетическая труба",
+  "gui.sun_panels.stored": "ЗАПАС",
+  "gui.sun_panels.output": "ВЫРАБОТКА",
+  "gui.sun_panels.rf": "%s RF",
+  "gui.sun_panels.rf_t": "%s / %s RF/t",
+  "gui.sun_panels.energy_tooltip": "Энергия: %s / %s RF",
+  "gui.sun_panels.sky.sun": "СОЛНЦЕ",
+  "gui.sun_panels.sky.dark": "НЕТ ДНЕВНОГО СВЕТА",
+  "gui.sun_panels.sky.blocked": "НЕТ ДОСТУПА К НЕБУ",
+  "gui.sun_panels.hint.blocked": "Стекло сверху можно",
+  "itemGroup.sun_panels.sun_panels_tab": "Sun Panels"
+}

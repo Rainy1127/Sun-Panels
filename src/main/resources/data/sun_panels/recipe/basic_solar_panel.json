@@ -7,7 +7,7 @@
   ],
   "key": {
     "G": {
-      "tag": "forge:glass"
+      "tag": "c:glass_blocks"
     },
     "R": {
       "item": "minecraft:redstone"
@@ -16,10 +16,12 @@
       "item": "minecraft:daylight_detector"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     }
   },
   "result": {
-    "item": "simplest_solar_panels:basic_solar_panel"
-  }
+    "id": "sun_panels:basic_solar_panel",
+    "count": 1
+  },
+  "category": "redstone"
 }

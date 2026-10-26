@@ -26,11 +26,16 @@ This mod adds three tiers of solar panels to Minecraft:
 
 ## How It Works
 
-- Sun panels generate energy during daylight hours
-- Generation is affected by time of day (reduced at dawn/dusk)
-- Panels must have a clear line of sight to the sky
-- Energy is automatically transferred to adjacent energy-accepting blocks
-- Power generation stops at night or during storms
+- Panels generate energy in daylight; output ramps smoothly at dawn, dusk and in rain and stops at night
+- Panels need sky access, but transparent blocks such as glass on top are fine
+- Energy is pushed automatically into adjacent energy-accepting blocks and pipes
+- Right-click a panel to see its stored energy, current output and whether it sees the sky
+
+## Energy Pipes
+
+- Basic (100 RF/t), Advanced (500 RF/t), Elite (2,000 RF/t)
+- Connected pipes form one network that carries power over any distance, limited by its slowest pipe
+- Pipes never tick and store nothing: energy goes straight from the source to every machine on the network
 
 ## Recipes
 
@@ -51,6 +56,11 @@ This mod adds three tiers of solar panels to Minecraft:
 - 2x Redstone Blocks
 - 1x Advanced Solar Panel
 - 3x Netherite Ingots
+
+### Energy Pipes
+- Basic: 2x Iron Ingot + 1x Redstone in a row → 6 pipes
+- Advanced: 8x Basic Pipe around 1x Gold Ingot → 8 pipes
+- Elite: 8x Advanced Pipe around 1x Diamond → 8 pipes
 
 ## Multi-Mod Compatibility
 
@@ -81,7 +91,7 @@ All compatibility is completely optional - the mod works fine without any of the
 ## Requirements
 
 - Minecraft 1.21.1
-- NeoForge 20.4.0-beta or higher
+- NeoForge 21.1 or higher
 
 ## License
 

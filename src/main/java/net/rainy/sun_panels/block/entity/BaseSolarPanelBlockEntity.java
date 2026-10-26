@@ -7,205 +7,184 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.rainy.sun_panels.block.entity.AdvancedSolarPanelBlockEntity;
-import net.rainy.sun_panels.block.entity.BasicSolarPanelBlockEntity;
-import net.rainy.sun_panels.block.entity.EliteSolarPanelBlockEntity;
-import net.rainy.sun_panels.registry.ModBlockEntities;
-import net.rainy.sun_panels.compat.mekanism.MekanismEnergyAdapter;
-import net.rainy.sun_panels.Sun_Panels;
-import org.slf4j.Logger;
-import com.mojang.logging.LogUtils;
-import net.rainy.sun_panels.compat.mekanism.MekanismCompat;
 import net.rainy.sun_panels.compat.ModCompatManager;
-
-import org.jetbrains.annotations.Nullable;
+import net.rainy.sun_panels.compat.mekanism.MekanismEnergyAdapter;
+import net.rainy.sun_panels.menu.SolarPanelMenu;
+import net.rainy.sun_panels.registry.ModBlockEntities;
+import net.rainy.sun_panels.registry.ModBlocks;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class BaseSolarPanelBlockEntity extends BlockEntity {
-    private static final Logger LOGGER = LogUtils.getLogger();
+public abstract class BaseSolarPanelBlockEntity extends BlockEntity implements MenuProvider {
+    public static final int SKY_BLOCKED = 0;
+    public static final int SKY_DARK = 1;
+    public static final int SKY_SUN = 2;
+
+    private static final Direction[] DIRECTIONS = Direction.values();
+    // Sky visibility only changes when blocks or time change, so it is re-evaluated once per second
+    // (staggered per panel) instead of every tick.
+    private static final int SKY_CHECK_INTERVAL = 20;
+    // At night vanilla darkens sky light by 11, so the effective sky brightness bottoms out at 4.
+    private static final int NIGHT_LIGHT = 4;
+    private static final int MAX_LIGHT = 15;
+
     protected final CustomEnergyStorage energyStorage;
     protected final int generationRate;
     protected int currentGeneration;
 
-    // Container data for the GUI
+    // What other blocks see through the capability: extract-only, so pipes and machines
+    // can never push energy back into a panel.
+    private final IEnergyStorage exposedStorage;
+
+    private int skyCheckCountdown;
+    private int cachedGeneration;
+    @Nullable
+    private BlockCapabilityCache<IEnergyStorage, Direction>[] outputCaches;
+
+    private int skyState = SKY_BLOCKED;
+
+    // Read-only values for the status screen, synced by vanilla data slots only when they change.
     protected final ContainerData data = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
-                case 0 -> energyStorage.getEnergyStored();
-                case 1 -> energyStorage.getMaxEnergyStored();
-                case 2 -> currentGeneration;
-                case 3 -> generationRate;
+                case SolarPanelMenu.DATA_ENERGY -> energyStorage.getEnergyStored();
+                case SolarPanelMenu.DATA_CAPACITY -> energyStorage.getMaxEnergyStored();
+                case SolarPanelMenu.DATA_OUTPUT -> currentGeneration;
+                case SolarPanelMenu.DATA_MAX_OUTPUT -> generationRate;
+                case SolarPanelMenu.DATA_SKY -> skyState;
+                case SolarPanelMenu.DATA_TIER -> getTierIndex();
                 default -> 0;
             };
         }
 
         @Override
         public void set(int index, int value) {
-            // Only allow setting the current generation
-            if (index == 2) {
-                currentGeneration = value;
-            }
         }
 
         @Override
         public int getCount() {
-            return 4;
+            return SolarPanelMenu.DATA_COUNT;
         }
     };
 
     public BaseSolarPanelBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, int capacity, int generationRate) {
         super(type, pos, state);
         this.energyStorage = new CustomEnergyStorage(capacity, generationRate, capacity);
+        this.exposedStorage = new ExtractOnlyStorage(this.energyStorage);
         this.generationRate = generationRate;
         this.currentGeneration = 0;
+        this.skyCheckCountdown = Math.floorMod(pos.hashCode(), SKY_CHECK_INTERVAL);
     }
 
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        // Register capabilities for BasicSolarPanelBlockEntity
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                ModBlockEntities.BASIC_SOLAR_PANEL.get(),
-                (blockEntity, direction) -> {
-                    if (blockEntity instanceof BasicSolarPanelBlockEntity basicSolarPanel) {
-                        return basicSolarPanel.getEnergyStorage();
-                    }
-                    return null;
-                }
-        );
-
-        // Register capabilities for AdvancedSolarPanelBlockEntity
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                ModBlockEntities.ADVANCED_SOLAR_PANEL.get(),
-                (blockEntity, direction) -> {
-                    if (blockEntity instanceof AdvancedSolarPanelBlockEntity advancedSolarPanel) {
-                        return advancedSolarPanel.getEnergyStorage();
-                    }
-                    return null;
-                }
-        );
-
-        // Register capabilities for EliteSolarPanelBlockEntity
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                ModBlockEntities.ELITE_SOLAR_PANEL.get(),
-                (blockEntity, direction) -> {
-                    if (blockEntity instanceof EliteSolarPanelBlockEntity eliteSolarPanel) {
-                        return eliteSolarPanel.getEnergyStorage();
-                    }
-                    return null;
-                }
-        );
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.BASIC_SOLAR_PANEL.get(),
+                (panel, side) -> panel.getExposedStorage());
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.ADVANCED_SOLAR_PANEL.get(),
+                (panel, side) -> panel.getExposedStorage());
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.ELITE_SOLAR_PANEL.get(),
+                (panel, side) -> panel.getExposedStorage());
     }
 
-    public static void tick(Level level, BlockPos pos, BlockState state, BaseSolarPanelBlockEntity blockEntity) {
-        if (level.isClientSide()) {
+    public static void tick(Level level, BlockPos pos, BlockState state, BaseSolarPanelBlockEntity panel) {
+        if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
 
-        // Reset current generation
-        blockEntity.currentGeneration = 0;
+        if (--panel.skyCheckCountdown <= 0) {
+            panel.skyCheckCountdown = SKY_CHECK_INTERVAL;
+            panel.cachedGeneration = panel.computeGeneration(level, pos);
+            panel.skyState = panel.cachedGeneration > 0 ? SKY_SUN
+                    : level.canSeeSky(pos.above()) ? SKY_DARK : SKY_BLOCKED;
+        }
 
-        // Check if it's daytime and has direct line of sight to the sky
-        // Adding proper daylight check to prevent generation at night
-        boolean isDaytime = level.isDay();
-        
-        // Check if there's no block above the solar panel
+        panel.currentGeneration = panel.cachedGeneration;
+        if (panel.cachedGeneration > 0 && panel.energyStorage.receiveEnergy(panel.cachedGeneration, false) > 0) {
+            panel.setChanged();
+        }
+
+        panel.pushEnergy(serverLevel, pos);
+    }
+
+    /**
+     * Uses the sky light level of the space above the panel instead of requiring that space to be air.
+     * Sky light passes through transparent blocks such as glass without losing strength,
+     * so a glass block directly on top of the panel no longer stops generation.
+     * <p>
+     * Output follows the effective sky brightness (sky light minus the current darkening from time of day
+     * and weather): full output in clear daylight, a smooth ramp at dawn, dusk and in rain, nothing at night.
+     */
+    protected int computeGeneration(Level level, BlockPos pos) {
+        if (!level.dimensionType().hasSkyLight()) {
+            return 0;
+        }
+
         BlockPos abovePos = pos.above();
-        boolean hasNoBlockAbove = level.isEmptyBlock(abovePos);
-        
-        // If there's no block above, check if it has sky access
-        boolean canSeeSky = hasNoBlockAbove && level.canSeeSky(abovePos);
-        int skyLight = level.getBrightness(LightLayer.SKY, abovePos) - level.getSkyDarken();
-
-        if (isDaytime && canSeeSky && skyLight > 0) {
-            // Calculate generation based on light level (max at noon)
-            float timeOfDay = level.getTimeOfDay(1.0F);
-            float multiplier = 1.0F;
-
-            // Reduce generation at dawn/dusk
-            if (timeOfDay < 0.25F || timeOfDay > 0.75F) {
-                multiplier = 0.5F;
-            }
-
-            // Generate energy - use skyLight without sky darken value to get actual light level
-            int energyToGenerate = Math.round(blockEntity.generationRate * multiplier * skyLight / 15.0F);
-            blockEntity.energyStorage.receiveEnergy(energyToGenerate, false);
-
-            // Update current generation
-            blockEntity.currentGeneration = energyToGenerate;
-
-            // Add debug message to verify energy generation and Mekanism integration
-            if (level.getGameTime() % 200 == 0) { // Log every 10 seconds (200 ticks)
-                StringBuilder logMessage = new StringBuilder();
-                logMessage.append(String.format(
-                        "Solar Panel at %s generating %d RF/t (Stored: %d/%d RF",
-                        pos,
-                        blockEntity.currentGeneration,
-                        blockEntity.energyStorage.getEnergyStored(),
-                        blockEntity.energyStorage.getMaxEnergyStored()
-                ));
-
-                // Add Mekanism energy info if available
-                if (ModCompatManager.isModLoaded(ModCompatManager.MEKANISM_ID)) {
-                    MekanismEnergyAdapter adapter = blockEntity.getMekanismEnergyAdapter();
-                    if (adapter != null) {
-                        logMessage.append(String.format(
-                                ", Mekanism: %.1f/%.1f J",
-                                adapter.getEnergy(),
-                                adapter.getMaxEnergy()
-                        ));
-                    }
-                }
-
-                // Add Tech Reborn energy info if available
-                if (ModCompatManager.isModLoaded(ModCompatManager.TECH_REBORN_ID)) {
-                    double euStored = blockEntity.energyStorage.getEnergyStored() * 0.25; // Convert to EU
-                    double euMax = blockEntity.energyStorage.getMaxEnergyStored() * 0.25; // Convert to EU
-                    logMessage.append(String.format(
-                            ", Tech Reborn: %.1f/%.1f EU",
-                            euStored,
-                            euMax
-                    ));
-                }
-
-                logMessage.append(")");
-                LOGGER.info(logMessage.toString());
-            }
-
-            // Mark block entity as changed
-            blockEntity.setChanged();
+        if (!level.canSeeSky(abovePos)) {
+            return 0;
         }
 
-        // Transfer energy to adjacent blocks
-        for (Direction direction : Direction.values()) {
-            BlockPos adjacentPos = pos.relative(direction);
-            BlockEntity adjacentEntity = level.getBlockEntity(adjacentPos);
+        int effectiveSky = Math.min(MAX_LIGHT, level.getBrightness(LightLayer.SKY, abovePos) - level.getSkyDarken());
+        if (effectiveSky <= NIGHT_LIGHT) {
+            return 0;
+        }
+        return Math.max(1, Math.round(generationRate * (float) (effectiveSky - NIGHT_LIGHT) / (MAX_LIGHT - NIGHT_LIGHT)));
+    }
 
-            if (adjacentEntity != null) {
-                IEnergyStorage adjacentStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, adjacentPos, direction.getOpposite());
+    @SuppressWarnings("unchecked")
+    private void pushEnergy(ServerLevel level, BlockPos pos) {
+        int available = energyStorage.getEnergyStored();
+        if (available <= 0) {
+            return;
+        }
 
-                if (adjacentStorage != null && adjacentStorage.canReceive()) {
-                    int energyToTransfer = blockEntity.energyStorage.extractEnergy(blockEntity.generationRate, true);
-                    int energyAccepted = adjacentStorage.receiveEnergy(energyToTransfer, false);
-                    blockEntity.energyStorage.extractEnergy(energyAccepted, false);
+        if (outputCaches == null) {
+            outputCaches = new BlockCapabilityCache[DIRECTIONS.length];
+            for (Direction direction : DIRECTIONS) {
+                outputCaches[direction.ordinal()] = BlockCapabilityCache.create(
+                        Capabilities.EnergyStorage.BLOCK, level, pos.relative(direction), direction.getOpposite(),
+                        () -> !this.isRemoved(), () -> {});
+            }
+        }
 
-                    if (energyAccepted > 0) {
-                        blockEntity.setChanged();
-                    }
+        for (Direction direction : DIRECTIONS) {
+            IEnergyStorage target = outputCaches[direction.ordinal()].getCapability();
+            if (target == null || !target.canReceive()) {
+                continue;
+            }
+
+            int accepted = target.receiveEnergy(available, false);
+            if (accepted > 0) {
+                energyStorage.extractEnergy(accepted, false);
+                available -= accepted;
+                setChanged();
+                if (available <= 0) {
+                    return;
                 }
             }
         }
+    }
+
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        outputCaches = null;
     }
 
     @Override
@@ -240,7 +219,6 @@ public abstract class BaseSolarPanelBlockEntity extends BlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    // Custom energy storage class that allows setting energy directly
     public static class CustomEnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {
         public CustomEnergyStorage(int capacity, int maxReceive, int maxExtract) {
             super(capacity, maxReceive, maxExtract);
@@ -259,35 +237,85 @@ public abstract class BaseSolarPanelBlockEntity extends BlockEntity {
         }
     }
 
-    // Getter for energy storage
+    private static final class ExtractOnlyStorage implements IEnergyStorage {
+        private final CustomEnergyStorage storage;
+
+        private ExtractOnlyStorage(CustomEnergyStorage storage) {
+            this.storage = storage;
+        }
+
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            return 0;
+        }
+
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return storage.extractEnergy(maxExtract, simulate);
+        }
+
+        @Override
+        public int getEnergyStored() {
+            return storage.getEnergyStored();
+        }
+
+        @Override
+        public int getMaxEnergyStored() {
+            return storage.getMaxEnergyStored();
+        }
+
+        @Override
+        public boolean canExtract() {
+            return true;
+        }
+
+        @Override
+        public boolean canReceive() {
+            return false;
+        }
+    }
+
     public CustomEnergyStorage getEnergyStorage() {
         return energyStorage;
     }
 
-    // Getter for generation rate
+    public IEnergyStorage getExposedStorage() {
+        return exposedStorage;
+    }
+
     public int getGenerationRate() {
         return generationRate;
     }
 
-    // Getter for current generation
     public int getCurrentGeneration() {
         return currentGeneration;
     }
 
-    // Getter for container data
     public ContainerData getContainerData() {
         return data;
     }
 
-    /**
-     * Creates a Mekanism energy adapter for this solar panel's energy storage.
-     * This allows the solar panel to work with Mekanism's energy system.
-     *
-     * @return A Mekanism energy adapter for this solar panel, or null if Mekanism is not loaded
-     */
+    /** 0 = basic, 1 = advanced, 2 = elite; used by the screen for the title and accent. */
+    public int getTierIndex() {
+        BlockState state = getBlockState();
+        if (state.is(ModBlocks.ELITE_SOLAR_PANEL.get())) {
+            return 2;
+        }
+        return state.is(ModBlocks.ADVANCED_SOLAR_PANEL.get()) ? 1 : 0;
+    }
+
+    @Override
+    public @NotNull Component getDisplayName() {
+        return getBlockState().getBlock().getName();
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player) {
+        return new SolarPanelMenu(containerId, inventory, this, data);
+    }
+
     public MekanismEnergyAdapter getMekanismEnergyAdapter() {
         if (!ModCompatManager.isModLoaded(ModCompatManager.MEKANISM_ID)) {
-            LOGGER.debug("Attempted to get Mekanism adapter but Mekanism is not loaded");
             return null;
         }
         return new MekanismEnergyAdapter(this.energyStorage);

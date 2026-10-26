@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "sun_panels:basic_solar_panel",
+    "sun_panels:advanced_solar_panel",
+    "sun_panels:elite_solar_panel",
+    "sun_panels:basic_energy_pipe",
+    "sun_panels:advanced_energy_pipe",
+    "sun_panels:elite_energy_pipe"
+  ]
+}

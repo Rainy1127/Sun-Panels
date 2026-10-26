@@ -4,8 +4,9 @@ license="MIT"
 
 [[mods]]
 modId="sun_panels"
-version="1.0.0"
+version="1.1.0"
 displayName="Simplest Solar Panels"
+logoFile="logo.png"
 authors="TeamSolar"
 description='''
 A simple mod that adds three tiers of solar panels to Minecraft.
@@ -26,7 +27,7 @@ Elite Solar Panel:
 [[dependencies.sun_panels]]
 modId="neoforge"
 type="required"
-versionRange="[20.4.0-beta,)"
+versionRange="[21.1.0,)"
 ordering="NONE"
 side="BOTH"
 
