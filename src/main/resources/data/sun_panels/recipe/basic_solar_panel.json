@@ -6,18 +6,10 @@
     "III"
   ],
   "key": {
-    "G": {
-      "tag": "c:glass_blocks"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "D": {
-      "item": "minecraft:daylight_detector"
-    },
-    "I": {
-      "tag": "c:ingots/iron"
-    }
+    "G": "#c:glass_blocks",
+    "R": "minecraft:redstone",
+    "D": "minecraft:daylight_detector",
+    "I": "#c:ingots/iron"
   },
   "result": {
     "id": "sun_panels:basic_solar_panel",

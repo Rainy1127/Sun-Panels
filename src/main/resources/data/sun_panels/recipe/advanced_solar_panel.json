@@ -6,18 +6,10 @@
     "DDD"
   ],
   "key": {
-    "G": {
-      "tag": "c:glass_panes"
-    },
-    "R": {
-      "item": "minecraft:redstone_block"
-    },
-    "B": {
-      "item": "sun_panels:basic_solar_panel"
-    },
-    "D": {
-      "tag": "c:gems/diamond"
-    }
+    "G": "#c:glass_panes",
+    "R": "minecraft:redstone_block",
+    "B": "sun_panels:basic_solar_panel",
+    "D": "#c:gems/diamond"
   },
   "result": {
     "id": "sun_panels:advanced_solar_panel",

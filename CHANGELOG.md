@@ -1,13 +1,11 @@
 # Changelog
 
-## 1.1.0 (Minecraft 1.21.1)
-- New: right-click a panel to open a dark status screen with stored energy, current output and sky access. It works for all three tiers.
-- New textures for panels and pipes: the tier is shown by colour (cyan, orange, red) and by the dots on the panel side.
-- New mod logo.
-- Russian translation.
-- Fixed: a glass block directly on top of a panel stopped generation. Panels now check sky light, which passes through glass.
-- Fixed: power did not travel through more than one pipe. Pipes are now a tick-less network that carries power over any length.
-- Fixed: panels produced only half of their advertised output during the day. Output now reaches the full rated value in clear daylight.
-- Fixed: crafting recipes did not load, and panels and pipes dropped nothing when mined.
-- Added: crafting recipes for the three pipe tiers.
-- Removed the panel log message that was written every 10 seconds.
+## 2.0.0 (Minecraft 26.1.2)
+- Port to Minecraft 26.1.2 and NeoForge 26.1.2 (Java 25), using the new transactional energy API.
+- Panels work with glass on top and reach their full rated output in clear daylight.
+- Pipes are a tick-less network that carries power over any length.
+- New dark status screen for panels (stored energy, output, sky access).
+- New textures for panels and pipes (tier shown by colour and by the dots on the panel side) and a new mod logo.
+- English and Russian translations.
+- One block entity type per block family instead of one per tier.
+- Mekanism and Tech Reborn compatibility code removed: neither mod exists for 26.1, and both accept Forge Energy anyway.

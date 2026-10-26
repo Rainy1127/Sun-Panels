@@ -1,6 +1,5 @@
 package net.rainy.sun_panels.menu;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -11,12 +10,12 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.rainy.sun_panels.block.entity.BaseSolarPanelBlockEntity;
-import net.rainy.sun_panels.registry.ModMenuTypes;
+import net.rainy.sun_panels.block.SolarPanelBlockEntity;
+import net.rainy.sun_panels.registry.SPRegistries;
 
 /**
- * Read-only status menu shared by all three panel tiers. Every value travels through vanilla data slots,
- * so the client is only updated when a number actually changes and no custom packets are needed.
+ * Read-only status menu of a solar panel. All values travel through vanilla data slots, so the client
+ * is updated only when a number actually changes and no custom packets are needed.
  */
 public class SolarPanelMenu extends AbstractContainerMenu {
     public static final int DATA_ENERGY = 0;
@@ -28,26 +27,25 @@ public class SolarPanelMenu extends AbstractContainerMenu {
     public static final int DATA_COUNT = 6;
 
     public static final int INVENTORY_Y = 84;
-    private static final int MAIN_INVENTORY_SLOTS = 27;
     private static final int PLAYER_SLOTS = 36;
 
     private final ContainerData data;
     private final ContainerLevelAccess access;
     private final Block block;
 
-    /** Client constructor, used by the menu type. The extra data buffer is not needed. */
-    public SolarPanelMenu(int containerId, Inventory inventory, FriendlyByteBuf extraData) {
+    /** Client constructor, used by the menu type. */
+    public SolarPanelMenu(int containerId, Inventory inventory) {
         this(containerId, inventory, new SimpleContainerData(DATA_COUNT), ContainerLevelAccess.NULL, Blocks.AIR);
     }
 
     /** Server constructor. */
-    public SolarPanelMenu(int containerId, Inventory inventory, BaseSolarPanelBlockEntity panel, ContainerData data) {
+    public SolarPanelMenu(int containerId, Inventory inventory, SolarPanelBlockEntity panel, ContainerData data) {
         this(containerId, inventory, data, ContainerLevelAccess.create(panel.getLevel(), panel.getBlockPos()),
                 panel.getBlockState().getBlock());
     }
 
     private SolarPanelMenu(int containerId, Inventory inventory, ContainerData data, ContainerLevelAccess access, Block block) {
-        super(ModMenuTypes.SOLAR_PANEL_MENU.get(), containerId);
+        super(SPRegistries.SOLAR_PANEL_MENU.get(), containerId);
         checkContainerDataCount(data, DATA_COUNT);
         this.data = data;
         this.access = access;
@@ -102,9 +100,9 @@ public class SolarPanelMenu extends AbstractContainerMenu {
         }
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
-        boolean moved = index < MAIN_INVENTORY_SLOTS
-                ? moveItemStackTo(stack, MAIN_INVENTORY_SLOTS, PLAYER_SLOTS, false)
-                : moveItemStackTo(stack, 0, MAIN_INVENTORY_SLOTS, false);
+        boolean moved = index < 27
+                ? moveItemStackTo(stack, 27, PLAYER_SLOTS, false)
+                : moveItemStackTo(stack, 0, 27, false);
         if (!moved) {
             return ItemStack.EMPTY;
         }

@@ -7,12 +7,8 @@
     "PPP"
   ],
   "key": {
-    "P": {
-      "item": "sun_panels:basic_energy_pipe"
-    },
-    "G": {
-      "tag": "c:ingots/gold"
-    }
+    "P": "sun_panels:basic_energy_pipe",
+    "G": "#c:ingots/gold"
   },
   "result": {
     "id": "sun_panels:advanced_energy_pipe",

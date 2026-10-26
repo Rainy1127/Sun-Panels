@@ -5,7 +5,7 @@
   "block.sun_panels.basic_energy_pipe": "Basic Energy Pipe",
   "block.sun_panels.advanced_energy_pipe": "Advanced Energy Pipe",
   "block.sun_panels.elite_energy_pipe": "Elite Energy Pipe",
-  "itemGroup.sun_panels.sun_panels_tab": "Sun Panels",
+  "itemGroup.sun_panels": "Sun Panels",
   "gui.sun_panels.stored": "STORED",
   "gui.sun_panels.output": "OUTPUT",
   "gui.sun_panels.rf": "%s RF",
